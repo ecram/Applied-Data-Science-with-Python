@@ -1,0 +1,30 @@
+import pandas as pd
+import numpy as np
+import re
+
+def answer_one():
+    return "ANSWER"
+
+energy = pd.ExcelFile('Energy Indicators.xls')
+energy = energy.parse('Energy', skiprows=16, skip_footer=38)
+del energy['Unnamed: 0']
+del energy['Unnamed: 1']
+new_cols = ['Country', 'Energy Supply', 'Energy Supply per Capita', '% Renewable']
+energy.rename(columns=dict(zip(energy.columns[0:], new_cols)),inplace=True)
+
+a = energy.iloc[4]['Energy Supply']
+energy = energy.replace(a, np.nan)
+energy['Energy Supply'] *= 1000000
+energy = energy.drop(energy.index[0])
+
+energy['Country'] = energy['Country'].map(lambda x: x.rstrip('1234567890'))
+energy['Country'] = energy['Country'].apply(lambda x: re.sub(r"\(.*\)", "", x))
+        
+energy = energy.replace("Republic of Korea","South Korea")
+energy = energy.replace("United States of America","United States")
+energy = energy.replace("United Kingdom of Great Britain and Northern Ireland","United Kingdom")
+energy = energy.replace("China, Hong Kong Special Administrative Region","Hong Kong")
+
+#print(energy.index)
+print(energy.columns)
+energy.head()

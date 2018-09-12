@@ -1,0 +1,66 @@
+import matplotlib.pyplot as plt
+import matplotlib.colors
+import pandas as pd
+import io
+import requests
+import numpy as np
+fig = plt.figure()
+ax = fig.add_subplot(111)
+
+urls="https://gist.githubusercontent.com/soranjh/771ae1de72d84a22eefec867a169742c/raw/a6e86504e26342c32ecfad890dfd853844b5dbe0/Ca-sum.csv"
+s=requests.get(urls).content
+dfsum=pd.read_csv(io.StringIO(s.decode('utf-8')))
+dfsum = dfsum.drop(dfsum.index[[0,1,2,3,4,5,18,28,29]])
+
+urlw="https://gist.githubusercontent.com/soranjh/8ffc8308c15b4120b7f82209c2d6e637/raw/dcd573970ae0277d1d66b1b9ad984747938773c7/Ca-win.csv"
+s=requests.get(urlw).content
+dfwin=pd.read_csv(io.StringIO(s.decode('utf-8')))
+dfwin = dfwin.drop(dfwin.index[[23,24]])
+
+dfsum = dfsum.tail(5)
+dfwin = dfwin.tail(5)
+
+dfsum['Year'], dfsum['Place'] = dfsum['Games'].str.split(' ', 1).str
+dfsum = dfsum.drop('Games', 1)
+dfsum = dfsum.drop('Place', 1)
+dfsum = dfsum.apply(pd.to_numeric, errors='coerce') 
+dfsum['ratio'] = dfsum['Total'] / dfsum['Athletes']
+
+
+dfwin['Year'], dfwin['Place'] = dfwin['Games'].str.split(' ', 1).str
+dfwin = dfwin.drop('Games', 1)
+dfwin = dfwin.drop('Place', 1)
+dfwin = dfwin.apply(pd.to_numeric, errors='coerce') 
+dfwin['ratio'] = dfwin['Total'] / dfwin['Athletes']
+
+plt.plot( 'Year', 'Total', data=dfwin, marker='o', markersize=14, color='blue', linewidth=2, label = 'Winter Games')
+plt.plot( 'Year', 'Total', data=dfsum, marker='o', markersize=14, color='red', linewidth=2, label = 'Summer Games')
+
+xs = [1920,2020]
+ys = [0.063460372911717827,0.063460372911717827]
+yw = [0.081561732393679462,0.081561732393679462]
+
+#plt.plot(xs, ys, 'r--')
+#plt.plot(xs, yw, 'b--')
+
+plt.xlim([1996, 2020])
+plt.ylim([10, 30])
+
+x_ticks = np.arange(1996, 2021, 4)
+y_ticks = np.arange(10, 31, 5)
+
+ax.set_xticks(x_ticks)
+ax.set_yticks(y_ticks)
+ax.legend(["Summer Games", "Winter Games"])
+
+plt.xlabel('Year')
+plt.ylabel('Number of Medals')
+plt.title('Canada Olympic Medals (2000-2018)', y=1.0)
+
+plt.legend(bbox_to_anchor=(1.04, 0.25), loc=1, ncol=1, frameon=False)
+plt.gca().spines['top'].set_visible(False)
+plt.gca().spines['right'].set_visible(False)
+
+matplotlib.rcParams.update({'font.size': 14})
+
+plt.show()
